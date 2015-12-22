@@ -1,0 +1,24 @@
+<!doctype html>
+<html ng-app="MyApp">
+<head>
+	<script src="angular.min.js"></script>
+	<script src="rangy-1.2.3/rangy-core.js"></script>
+	<script src="markdown.js"></script>
+	<script src="wysimd.js"></script>
+	<script>
+		var MyApp = angular.module('MyApp', ['moof2k.wysimd']);
+
+		MyApp.controller('MyController', function($scope) {
+			$scope.mycontent = "sdfsdf";
+		});
+	</script>
+</head>
+<body>
+	<div ng-controller="MyController">
+		<textarea style="font-family: monospace;" cols=80 rows=20 ng-model="mycontent">
+		</textarea>
+     	<wysimd ng-model="mycontent" contentEditable>
+     	</wysimd>
+	</div>
+</body>
+</html>
