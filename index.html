@@ -9,16 +9,29 @@
 		var MyApp = angular.module('MyApp', ['moof2k.wysimd']);
 
 		MyApp.controller('MyController', function($scope) {
-			$scope.mycontent = "sdfsdf";
+			$scope.mycontent = "# What you see is markdown\n\n**WYSIMD** is an Angular ``directive`` that renders a _contentEditable_-capable DIV backed by an ngModel storing Markdown.";
 		});
 	</script>
 </head>
-<body>
-	<div ng-controller="MyController">
-		<textarea style="font-family: monospace;" cols=80 rows=20 ng-model="mycontent">
-		</textarea>
-     	<wysimd ng-model="mycontent" contentEditable>
-     	</wysimd>
-	</div>
+<body ng-controller="MyController">
+	<table>
+	<tr>
+		<th>
+			<tt>textarea</tt>
+		</th>
+		<th>
+			<tt>wysimd</tt>
+		</th>
+	</tr>
+	<tr>
+		<td valign=top>
+			<textarea style="font-family: monospace;" cols=80 rows=20 ng-model="mycontent"></textarea>
+		</td>
+		<td valign=top>
+			<input type="checkbox" ng-model="editable">Editable</input>
+     		<wysimd ng-model="mycontent" contentEditable="{{editable}}"></wysimd>
+     	</td>
+	</tr>
+	</table>
 </body>
 </html>
