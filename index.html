@@ -9,9 +9,16 @@
 		var MyApp = angular.module('MyApp', ['moof2k.wysimd']);
 
 		MyApp.controller('MyController', function($scope) {
-			$scope.mycontent = "# What you see is markdown\n\n**WYSIMD** is an Angular ``directive`` that renders a _contentEditable_-capable DIV backed by an ngModel storing Markdown.";
+			$scope.mycontrol = {};
+			$scope.editable = true;
+			$scope.mycontent = "# What you see is markdown\n\n**WYSIMD** is an Angular `directive` that renders a _contentEditable_-capable DIV backed by an ngModel storing Markdown.";
 		});
 	</script>
+	<style>
+		wysimd:focus {
+		    outline: 0 none;
+		}
+	</style>
 </head>
 <body ng-controller="MyController">
 	<table>
@@ -29,7 +36,8 @@
 		</td>
 		<td valign=top>
 			<input type="checkbox" ng-model="editable">Editable</input>
-     		<wysimd ng-model="mycontent" contentEditable="{{editable}}"></wysimd>
+			<button ng-click="mycontrol.bold()">Bold</button>
+     		<wysimd ng-model="mycontent" control="mycontrol" contentEditable="{{editable}}"></wysimd>
      	</td>
 	</tr>
 	</table>

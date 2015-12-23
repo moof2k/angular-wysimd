@@ -370,6 +370,9 @@ directive('wysimd', function() {
 	return {
 		restrict: 'E',
 		require: 'ngModel',
+		scope: {
+			control: '='
+		},
 		compile: function() {
 			return postLink;
 		}
@@ -377,6 +380,16 @@ directive('wysimd', function() {
 
 	function postLink(scope, element, attrs, ngModel) {
 		if (!ngModel) return;
+		
+		scope.internalControl = scope.control || {};
+
+		scope.internalControl.bold = function() {
+			console.log('bold');
+            document.execCommand("bold", false, null);
+
+            // Rebuild markdown
+            scope.$evalAsync(html2markdown);
+        };
 
 		// Specify how UI should be updated
         ngModel.$render = function() {
