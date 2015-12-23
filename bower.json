@@ -1,0 +1,22 @@
+{
+  "name": "wysimd",
+  "main": "wysimd.js",
+  "description": "What You See Is Markdown",
+  "dependencies": {
+    "angular": "~1.2.16",
+    "rangy": "~1.2.3"
+  },
+  "authors": [
+    "moof2k"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
