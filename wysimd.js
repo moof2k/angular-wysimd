@@ -34,362 +34,6 @@ var fixhtml = function(node) {
     });
 };
 
-var FILTER_NONE = 0x00;
-var FILTER_INLINE_FORMATTING = 0x01;
-var FILTER_BLOCK_FORMATTING = 0x02;
-var FILTER_LIST_FORMATTING = 0x04;
-
-var iterateChildren = function(node, filter) {
-    var md = "";
-    var child = node.firstChild;
-    while(child) {
-        md += dom2markdown(child, filter);
-        child = child.nextSibling;
-    }
-    return md;
-};
-
-var dom2markdown = function(node, filter) {
-
-    var md = "";
-
-    if(node.nodeType == 3) {
-        if(node.data == ' ') {
-            md += ' ';
-        }
-        else if(node.data.trim() !== '') {
-            md += node.data.replace(/\n/g, ' ');
-
-            // Escape inline formatting characters
-            md = md.replace(/\*/g, '\\*');
-            md = md.replace(/_/g, '\\_');
-            md = md.replace(/`/g, '\\`');
-        }
-    } else {
-        switch(node.nodeName) {
-        	case "WYSIMD":
-            case "DIV":
-            case "P":
-                if(filter & FILTER_BLOCK_FORMATTING) {
-                    md += iterateChildren(node, filter) + "\n";
-                } else {
-                    md += "\n";
-                    md += iterateChildren(node, filter);
-                    md += "\n";
-                }
-                break;
-            case "BR":
-                md += "  \n";
-                break;
-            case "A":
-                var content = iterateChildren(node, filter);
-                var link = node.attributes.href.value;
-
-                if(content == link) {
-                    md += "<" + link + ">";
-                } else {
-                    if(node.attributes.title) {
-                        link += " \"" + node.attributes.title.value + "\"";
-                    }
-
-                    md += "[" + content + "]" + "(" + link + ")";
-                }
-                break;
-            case "IMG":
-                md += "![" + node.alt + "]" + "(" + node.src + ")";
-                break;
-            case "B":
-            case "STRONG":
-                md += "**" + iterateChildren(node, filter) + "**";
-                break;
-            case "I":
-            case "EM":
-                md += "_" + iterateChildren(node, filter) + "_";
-                break;
-            case "TT":
-                md += "`" + iterateChildren(node, filter) + "`";
-                break;
-            case "H1":
-                if(filter & FILTER_BLOCK_FORMATTING) {
-                    md += iterateChildren(node, filter) + " ";
-                } else {
-                    md += "\n# " + iterateChildren(node, filter) + "\n";
-                }
-                break;
-            case "H2":
-                if(filter & FILTER_BLOCK_FORMATTING) {
-                    md += iterateChildren(node, filter) + " ";
-                } else {
-                    md += "\n## " + iterateChildren(node, filter) + "\n";
-                }
-                break;
-            case "H3":
-                if(filter & FILTER_BLOCK_FORMATTING) {
-                    md += iterateChildren(node, filter) + " ";
-                } else {
-                    md += "\n### " + iterateChildren(node, filter) + "\n";
-                }
-                break;
-            case "H4":
-                if(filter & FILTER_BLOCK_FORMATTING) {
-                    md += iterateChildren(node, filter) + " ";
-                } else {
-                    md += "\n#### " + iterateChildren(node, filter) + "\n";
-                }
-                break;
-            case "H5":
-                if(filter & FILTER_BLOCK_FORMATTING) {
-                    md += iterateChildren(node, filter) + " ";
-                } else {
-                    md += "\n##### " + iterateChildren(node, filter) + "\n";
-                }
-                break;
-            case "BLOCKQUOTE":
-                if(filter & FILTER_BLOCK_FORMATTING) {
-                    md += iterateChildren(node, filter) + " ";
-                } else {
-                    md += iterateChildren(node, filter);
-
-                    // Remove any straggling whitespace
-                    md = md.replace(/\s+$/, '');
-                    md = md.replace(/^\s+/, '');
-
-                    // Prefix all contained text with >
-                    md = md.split('\n');
-                    md.unshift('');
-                    md = md.join('\n> ') + "\n";
-                }
-                break;
-            case "PRE":
-                if(filter & FILTER_BLOCK_FORMATTING) {
-                    md += " " + node.innerText.replace(/\n/g, ' ') + " ";
-                } else {
-                    md += node.innerText;
-
-                    // Indent all contained text
-                    md = "\n    " + md.split('\n').join('\n    ') + "\n";
-                }
-                break;
-            case "UL":
-            case "OL":
-                if(filter & FILTER_LIST_FORMATTING) {
-                    md += iterateChildren(node, filter) + " ";
-
-                } else {
-                    md += iterateChildren(node, filter);
-
-                    // If we're the last of the list, add additional newline
-                    if(node.parentNode.nodeName == "DIV" || node.parentNode.nodeName == "P") {
-                        md += "\n\n";
-                    } else {
-                        // Indent all contained text
-                        md = md.split('\n').join('\n    ');
-                    }
-                }
-
-                break;
-            case "LI":
-                if(filter & FILTER_LIST_FORMATTING) {
-                    md += " " + iterateChildren(node, filter);
-
-                } else {
-                    if(node.parentNode.nodeName == "OL") {
-                        md += '\n1.  ';
-                    } else {
-                        md += '\n*   ';
-                    }
-                    md += iterateChildren(node, filter | FILTER_BLOCK_FORMATTING);
-                }
-
-                break;
-            case "TABLE":
-                md += "\n" + iterateChildren(node, filter | FILTER_LIST_FORMATTING | FILTER_BLOCK_FORMATTING) + "\n";
-                break;
-            case "THEAD":
-                md += iterateChildren(node, filter);
-
-                // Append a heading row following this row
-                // Be mindful of |'s inside the column names
-                md = md + md.replace(/([^\\|\n])/g, '-').replace(/\\\|/g, '--').replace(/\\/g, '-');
-
-                break;
-            case "TBODY":
-                md += iterateChildren(node, filter);
-                break;
-            case "TR":
-                md += "|" + iterateChildren(node, filter) + "\n";
-                break;
-            case "TH":
-            case "TD":
-                md += iterateChildren(node, filter);
-
-                // Escape |
-                md = md.replace(/\|/g, '\\|');
-                md += " |";
-                break;
-
-        }
-    }
-
-    return md;
-};
-
-var block_container = function(node, name) {
-    if(node.nodeName == name) {
-        return node;
-    } else {
-        if(node.parentNode) {
-            return block_container(node.parentNode, name);
-        } else {
-            return null;
-        }
-    }
-};
-
-var html_keydown = function(event) {
-    var sel, range, container;
-
-    if (event.keyCode == 32) {
-        // Handle space key
-        sel = rangy.getSelection();
-        range = sel.getRangeAt(0);
-        container = range.commonAncestorContainer;
-
-        if(container.parentNode.nodeName == "P" || container.parentNode.nodeName == "DIV") {
-
-            if(container.parentNode.innerText.match(/^\*\s*$/)) {
-                // Create an unordered list when "* " is typed in an empty P/DIV
-
-                if(range.startOffset == range.endOffset) {
-                    if(range.startOffset == 1) {
-                        document.execCommand("insertUnorderedList", false, null);
-
-                        // Clear the content from the new LI
-                        sel = rangy.getSelection();
-                        range = sel.getRangeAt(0);
-                        container = range.commonAncestorContainer;
-                        container.data = "";
-
-                        event.preventDefault();
-                    }
-                }
-
-            } else if(container.parentNode.innerText.match(/^#+\s*$/)) {
-                // Create a heading when "# " is typed in an empty P/DIV
-
-                if(range.startOffset == range.endOffset) {
-                    if(range.startOffset >= 1) {
-                        // Determine the heading level by counting the number of #'s
-                        var headingLevel = container.parentNode.innerText.match(/#/g).length;
-                        if(headingLevel > 5) {
-                            headingLevel = 5;
-                        }
-
-                        document.execCommand('formatBlock', false, "H" + headingLevel);
-
-                        // Reset the content for the new heading
-                        sel = rangy.getSelection();
-                        range = sel.getRangeAt(0);
-                        container = range.commonAncestorContainer;
-                        container.data = "Heading " + headingLevel;
-
-                        // Select all of the text so the user can keep typing
-                        sel = rangy.getSelection();
-                        range = sel.getRangeAt(0);
-                        range.setEnd(container, container.data.length);
-                        sel.setSingleRange(range);
-
-                        event.preventDefault();
-                    }
-                }
-            }
-        }
-
-    } else if (event.keyCode == 9) {
-        // Handle tab key
-        sel = rangy.getSelection();
-        range = sel.getRangeAt(0);
-        container = range.commonAncestorContainer;
-        startContainer = range.StartContainer;
-
-        container = block_container(container, "LI");
-
-        if(container) {
-            // We're in a list
-            // Verify nothing is selected
-            if(range.startOffset == range.endOffset) {
-                // Insert a new sub-list at this point
-                console.log('go');
-                var ul = document.createElement("UL");
-
-                if(container.previousSibling) {
-                    container.previousSibling.appendChild(ul);
-                    ul.appendChild(container);
-
-                    range = document.createRange();
-                    range.setStart(container, 0);
-                    range.setEnd(container, 0);
-                    sel.setSingleRange(range);
-                }
-            }
-
-            // If you hit tab inside an LI always eat the tab
-            event.preventDefault();
-        }
-
-    } else if (event.keyCode == 13) {
-        // Handle return / newline key
-        sel = rangy.getSelection();
-        range = sel.getRangeAt(0);
-        container = range.commonAncestorContainer;
-
-        if(container.nodeName == "PRE" && range.endOffset == container.childNodes.length) {
-            // We're at the very end of a PRE
-            var p = document.createElement("P");
-            var br = document.createElement("BR");
-            p.appendChild(br);
-
-            range.deleteContents();
-            container.parentNode.insertBefore(p, container.nextSibling);
-            range.setStartAfter(br);
-            sel.setSingleRange(range);
-
-            event.preventDefault();
-        }
-
-        switch(container.parentNode.nodeName) {
-
-            case "PRE":
-                if(container.nextSibling === null && range.endOffset == container.data.length) {
-                    // We're at the end of the PRE, add a <br>
-                    var brnode = document.createElement("BR");
-                    range.deleteContents();
-                    range.insertNode(brnode);
-                    range.setStartAfter(brnode);
-                    sel.setSingleRange(range);
-
-                }
-
-                // Anywhere else inside the PRE, add a \n
-                var nlnode = document.createTextNode("\n");
-                range.deleteContents();
-                range.insertNode(nlnode);
-                range.setStartAfter(nlnode);
-                sel.setSingleRange(range);
-
-
-                event.preventDefault();
-
-                break;
-
-            default:
-                break;
-        }
-
-        return true;
-    }
-};
-
 angular.module('moof2k.wysimd', []).
 directive('wysimd', function() {
 	return {
@@ -490,5 +134,364 @@ directive('wysimd', function() {
             ngModel.$setViewValue(md);
 
         }
-	}
+	};
+
+	var FILTER_NONE = 0x00;
+	var FILTER_INLINE_FORMATTING = 0x01;
+	var FILTER_BLOCK_FORMATTING = 0x02;
+	var FILTER_LIST_FORMATTING = 0x04;
+
+	function iterateChildren(node, filter) {
+	    var md = "";
+	    var child = node.firstChild;
+	    while(child) {
+	        md += dom2markdown(child, filter);
+	        child = child.nextSibling;
+	    }
+	    return md;
+	};
+
+	// Returns markdown text representing the HTML starting at the given DOM node
+	function dom2markdown(node, filter) {
+	    var md = "";
+
+	    if(node.nodeType == 3) {
+	        if(node.data == ' ') {
+	            md += ' ';
+	        }
+	        else if(node.data.trim() !== '') {
+	            md += node.data.replace(/\n/g, ' ');
+
+	            // Escape inline formatting characters
+	            md = md.replace(/\*/g, '\\*');
+	            md = md.replace(/_/g, '\\_');
+	            md = md.replace(/`/g, '\\`');
+	        }
+	    } else {
+	        switch(node.nodeName) {
+	        	case "WYSIMD":
+	            case "DIV":
+	            case "P":
+	                if(filter & FILTER_BLOCK_FORMATTING) {
+	                    md += iterateChildren(node, filter) + "\n";
+	                } else {
+	                    md += "\n";
+	                    md += iterateChildren(node, filter);
+	                    md += "\n";
+	                }
+	                break;
+	            case "BR":
+	                md += "  \n";
+	                break;
+	            case "A":
+	                var content = iterateChildren(node, filter);
+	                var link = node.attributes.href.value;
+
+	                if(content == link) {
+	                    md += "<" + link + ">";
+	                } else {
+	                    if(node.attributes.title) {
+	                        link += " \"" + node.attributes.title.value + "\"";
+	                    }
+
+	                    md += "[" + content + "]" + "(" + link + ")";
+	                }
+	                break;
+	            case "IMG":
+	                md += "![" + node.alt + "]" + "(" + node.src + ")";
+	                break;
+	            case "B":
+	            case "STRONG":
+	                md += "**" + iterateChildren(node, filter) + "**";
+	                break;
+	            case "I":
+	            case "EM":
+	                md += "_" + iterateChildren(node, filter) + "_";
+	                break;
+	            case "TT":
+	                md += "`" + iterateChildren(node, filter) + "`";
+	                break;
+	            case "H1":
+	                if(filter & FILTER_BLOCK_FORMATTING) {
+	                    md += iterateChildren(node, filter) + " ";
+	                } else {
+	                    md += "\n# " + iterateChildren(node, filter) + "\n";
+	                }
+	                break;
+	            case "H2":
+	                if(filter & FILTER_BLOCK_FORMATTING) {
+	                    md += iterateChildren(node, filter) + " ";
+	                } else {
+	                    md += "\n## " + iterateChildren(node, filter) + "\n";
+	                }
+	                break;
+	            case "H3":
+	                if(filter & FILTER_BLOCK_FORMATTING) {
+	                    md += iterateChildren(node, filter) + " ";
+	                } else {
+	                    md += "\n### " + iterateChildren(node, filter) + "\n";
+	                }
+	                break;
+	            case "H4":
+	                if(filter & FILTER_BLOCK_FORMATTING) {
+	                    md += iterateChildren(node, filter) + " ";
+	                } else {
+	                    md += "\n#### " + iterateChildren(node, filter) + "\n";
+	                }
+	                break;
+	            case "H5":
+	                if(filter & FILTER_BLOCK_FORMATTING) {
+	                    md += iterateChildren(node, filter) + " ";
+	                } else {
+	                    md += "\n##### " + iterateChildren(node, filter) + "\n";
+	                }
+	                break;
+	            case "BLOCKQUOTE":
+	                if(filter & FILTER_BLOCK_FORMATTING) {
+	                    md += iterateChildren(node, filter) + " ";
+	                } else {
+	                    md += iterateChildren(node, filter);
+
+	                    // Remove any straggling whitespace
+	                    md = md.replace(/\s+$/, '');
+	                    md = md.replace(/^\s+/, '');
+
+	                    // Prefix all contained text with >
+	                    md = md.split('\n');
+	                    md.unshift('');
+	                    md = md.join('\n> ') + "\n";
+	                }
+	                break;
+	            case "PRE":
+	                if(filter & FILTER_BLOCK_FORMATTING) {
+	                    md += " " + node.innerText.replace(/\n/g, ' ') + " ";
+	                } else {
+	                    md += node.innerText;
+
+	                    // Indent all contained text
+	                    md = "\n    " + md.split('\n').join('\n    ') + "\n";
+	                }
+	                break;
+	            case "UL":
+	            case "OL":
+	                if(filter & FILTER_LIST_FORMATTING) {
+	                    md += iterateChildren(node, filter) + " ";
+
+	                } else {
+	                    md += iterateChildren(node, filter);
+
+	                    // If we're the last of the list, add additional newline
+	                    if(node.parentNode.nodeName == "DIV" || node.parentNode.nodeName == "P") {
+	                        md += "\n\n";
+	                    } else {
+	                        // Indent all contained text
+	                        md = md.split('\n').join('\n    ');
+	                    }
+	                }
+
+	                break;
+	            case "LI":
+	                if(filter & FILTER_LIST_FORMATTING) {
+	                    md += " " + iterateChildren(node, filter);
+
+	                } else {
+	                    if(node.parentNode.nodeName == "OL") {
+	                        md += '\n1.  ';
+	                    } else {
+	                        md += '\n*   ';
+	                    }
+	                    md += iterateChildren(node, filter | FILTER_BLOCK_FORMATTING);
+	                }
+
+	                break;
+	            case "TABLE":
+	                md += "\n" + iterateChildren(node, filter | FILTER_LIST_FORMATTING | FILTER_BLOCK_FORMATTING) + "\n";
+	                break;
+	            case "THEAD":
+	                md += iterateChildren(node, filter);
+
+	                // Append a heading row following this row
+	                // Be mindful of |'s inside the column names
+	                md = md + md.replace(/([^\\|\n])/g, '-').replace(/\\\|/g, '--').replace(/\\/g, '-');
+
+	                break;
+	            case "TBODY":
+	                md += iterateChildren(node, filter);
+	                break;
+	            case "TR":
+	                md += "|" + iterateChildren(node, filter) + "\n";
+	                break;
+	            case "TH":
+	            case "TD":
+	                md += iterateChildren(node, filter);
+
+	                // Escape |
+	                md = md.replace(/\|/g, '\\|');
+	                md += " |";
+	                break;
+
+	        }
+	    }
+
+	    return md;
+	};
+
+	// Finds the block container parent of the given name, used by the keypress
+	// handler to find containing LI's when the tab key is pressed.
+	function block_container(node, name) {
+	    if(node.nodeName == name) {
+	        return node;
+	    } else {
+	        if(node.parentNode) {
+	            return block_container(node.parentNode, name);
+	        } else {
+	            return null;
+	        }
+	    }
+	};
+
+	// Perform auto-completion / expansion tasks when a key is pressed within the HTML editor
+	function html_keydown(event) {
+	    var sel, range, container;
+
+	    if (event.keyCode == 32) {
+	        // Handle space key
+	        sel = rangy.getSelection();
+	        range = sel.getRangeAt(0);
+	        container = range.commonAncestorContainer;
+
+	        if(container.parentNode.nodeName == "P" || container.parentNode.nodeName == "DIV") {
+
+	            if(container.parentNode.innerText.match(/^\*\s*$/)) {
+	                // Create an unordered list when "* " is typed in an empty P/DIV
+
+	                if(range.startOffset == range.endOffset) {
+	                    if(range.startOffset == 1) {
+	                        document.execCommand("insertUnorderedList", false, null);
+
+	                        // Clear the content from the new LI
+	                        sel = rangy.getSelection();
+	                        range = sel.getRangeAt(0);
+	                        container = range.commonAncestorContainer;
+	                        container.data = "";
+
+	                        event.preventDefault();
+	                    }
+	                }
+
+	            } else if(container.parentNode.innerText.match(/^#+\s*$/)) {
+	                // Create a heading when "# " is typed in an empty P/DIV
+
+	                if(range.startOffset == range.endOffset) {
+	                    if(range.startOffset >= 1) {
+	                        // Determine the heading level by counting the number of #'s
+	                        var headingLevel = container.parentNode.innerText.match(/#/g).length;
+	                        if(headingLevel > 5) {
+	                            headingLevel = 5;
+	                        }
+
+	                        document.execCommand('formatBlock', false, "H" + headingLevel);
+
+	                        // Reset the content for the new heading
+	                        sel = rangy.getSelection();
+	                        range = sel.getRangeAt(0);
+	                        container = range.commonAncestorContainer;
+	                        container.data = "Heading " + headingLevel;
+
+	                        // Select all of the text so the user can keep typing
+	                        sel = rangy.getSelection();
+	                        range = sel.getRangeAt(0);
+	                        range.setEnd(container, container.data.length);
+	                        sel.setSingleRange(range);
+
+	                        event.preventDefault();
+	                    }
+	                }
+	            }
+	        }
+
+	    } else if (event.keyCode == 9) {
+	        // Handle tab key
+	        sel = rangy.getSelection();
+	        range = sel.getRangeAt(0);
+	        container = range.commonAncestorContainer;
+	        startContainer = range.StartContainer;
+
+	        container = block_container(container, "LI");
+
+	        if(container) {
+	            // We're in a list
+	            // Verify nothing is selected
+	            if(range.startOffset == range.endOffset) {
+	                // Insert a new sub-list at this point
+	                console.log('go');
+	                var ul = document.createElement("UL");
+
+	                if(container.previousSibling) {
+	                    container.previousSibling.appendChild(ul);
+	                    ul.appendChild(container);
+
+	                    range = document.createRange();
+	                    range.setStart(container, 0);
+	                    range.setEnd(container, 0);
+	                    sel.setSingleRange(range);
+	                }
+	            }
+
+	            // If you hit tab inside an LI always eat the tab
+	            event.preventDefault();
+	        }
+
+	    } else if (event.keyCode == 13) {
+	        // Handle return / newline key
+	        sel = rangy.getSelection();
+	        range = sel.getRangeAt(0);
+	        container = range.commonAncestorContainer;
+
+	        if(container.nodeName == "PRE" && range.endOffset == container.childNodes.length) {
+	            // We're at the very end of a PRE
+	            var p = document.createElement("P");
+	            var br = document.createElement("BR");
+	            p.appendChild(br);
+
+	            range.deleteContents();
+	            container.parentNode.insertBefore(p, container.nextSibling);
+	            range.setStartAfter(br);
+	            sel.setSingleRange(range);
+
+	            event.preventDefault();
+	        }
+
+	        switch(container.parentNode.nodeName) {
+
+	            case "PRE":
+	                if(container.nextSibling === null && range.endOffset == container.data.length) {
+	                    // We're at the end of the PRE, add a <br>
+	                    var brnode = document.createElement("BR");
+	                    range.deleteContents();
+	                    range.insertNode(brnode);
+	                    range.setStartAfter(brnode);
+	                    sel.setSingleRange(range);
+
+	                }
+
+	                // Anywhere else inside the PRE, add a \n
+	                var nlnode = document.createTextNode("\n");
+	                range.deleteContents();
+	                range.insertNode(nlnode);
+	                range.setStartAfter(nlnode);
+	                sel.setSingleRange(range);
+
+
+	                event.preventDefault();
+
+	                break;
+
+	            default:
+	                break;
+	        }
+
+	        return true;
+	    }
+	};
 });
