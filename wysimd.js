@@ -383,9 +383,37 @@ directive('wysimd', function() {
 		
 		scope.internalControl = scope.control || {};
 
+		scope.internalControl.format = function(name) {
+            document.execCommand('formatBlock', false, name);
+
+            // Rebuild markdown
+            scope.$evalAsync(html2markdown);
+        };
+
 		scope.internalControl.bold = function() {
 			console.log('bold');
             document.execCommand("bold", false, null);
+
+            // Rebuild markdown
+            scope.$evalAsync(html2markdown);
+        };
+
+        scope.internalControl.italic = function() {
+            document.execCommand("italic", false, null);
+
+            // Rebuild markdown
+            scope.$evalAsync(html2markdown);
+        };
+
+        scope.internalControl.unordered_list = function() {
+            document.execCommand("insertUnorderedList", false, null);
+
+            // Rebuild markdown
+            scope.$evalAsync(html2markdown);
+        };
+
+        scope.internalControl.ordered_list = function() {
+            document.execCommand("insertOrderedList", false, null);
 
             // Rebuild markdown
             scope.$evalAsync(html2markdown);

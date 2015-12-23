@@ -36,7 +36,17 @@
 		</td>
 		<td valign=top>
 			<input type="checkbox" ng-model="editable">Editable</input>
-			<button ng-click="mycontrol.bold()">Bold</button>
+			<select ng-model="format" ng-init="format = 'p'" ng-change="mycontrol.format(format)">
+	            <option value="p">Paragraph</option>
+	            <option value="h1">Heading 1</option>
+	            <option value="h2">Heading 2</option>
+	            <option value="blockquote">Blockquote</option>
+	            <option value="pre">Codeblock</option>
+            </select>
+			<button ng-click="mycontrol.bold()">B</button>
+			<button ng-click="mycontrol.italic()">I</button>
+			<button ng-click="mycontrol.unordered_list()">UL</button>
+			<button ng-click="mycontrol.ordered_list()">OL</button>
      		<wysimd ng-model="mycontent" control="mycontrol" contentEditable="{{editable}}"></wysimd>
      	</td>
 	</tr>
