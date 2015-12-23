@@ -1,6 +1,6 @@
 {
   "name": "wysimd",
-  "main": "wysimd.js",
+  "main": ["wysimd.js", "markdown.js"],
   "description": "What You See Is Markdown",
   "dependencies": {
     "angular": "~1.2.16",
