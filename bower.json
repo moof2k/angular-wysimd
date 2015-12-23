@@ -10,8 +10,6 @@
     "moof2k"
   ],
   "license": "BSD",
-  "homepage": "",
-  "private": true,
   "ignore": [
     "**/.*",
     "node_modules",
