@@ -28,3 +28,7 @@ WYSIMD is made up of three main components:
 with other elements that are tied to the same ngModel.
 * A markdown -> html conversion routine, adapted from https://github.com/evilstreak/markdown-js
 * A DOM -> markdown conversion routine
+
+## License
+
+BSD
