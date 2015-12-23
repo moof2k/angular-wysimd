@@ -398,61 +398,51 @@ directive('wysimd', function() {
 		scope: {
 			control: '='
 		},
-		compile: function() {
-			return postLink;
-		}
+		link: link
 	};
 
-	function postLink(scope, element, attrs, ngModel) {
+	function link(scope, element, attrs, ngModel) {
 		if (!ngModel) return;
 		
 		scope.internalControl = scope.control || {};
 
+		// Modify the formatBlock of the currently selected text
 		scope.internalControl.format = function(name) {
             document.execCommand('formatBlock', false, name);
-
-            // Rebuild markdown
             scope.$evalAsync(html2markdown);
         };
 
+        // Toggle bold on the currently selected text
 		scope.internalControl.bold = function() {
-			console.log('bold');
             document.execCommand("bold", false, null);
-
-            // Rebuild markdown
             scope.$evalAsync(html2markdown);
         };
 
+        // Toggle italic on the current selected text
         scope.internalControl.italic = function() {
             document.execCommand("italic", false, null);
-
-            // Rebuild markdown
             scope.$evalAsync(html2markdown);
         };
 
+        // Toggle a UL on the currently selected text
         scope.internalControl.unordered_list = function() {
             document.execCommand("insertUnorderedList", false, null);
-
-            // Rebuild markdown
             scope.$evalAsync(html2markdown);
         };
 
+        // Toogle an OL on the currently selected text
         scope.internalControl.ordered_list = function() {
             document.execCommand("insertOrderedList", false, null);
-
-            // Rebuild markdown
             scope.$evalAsync(html2markdown);
         };
 
 		// Specify how UI should be updated
         ngModel.$render = function() {
-
             if (element[0].nodeName == "TEXTAREA") {
                 element.html(ngModel.$viewValue || '');
             } else {
                 markdown2html();
             }
-
         };
 
         // Listen for change events to update markdown model
@@ -460,11 +450,12 @@ directive('wysimd', function() {
 
             // Update toolbar
             if (document.queryCommandState) {
+            	// TODO: Callback handler for bold/italic/formatblock etc
                 //scope.toolbarModel.bold = document.queryCommandState("bold");
                 //scope.toolbarModel.italic = document.queryCommandState("italic");
             }
 
-            // Fix up HTML issues
+            // TODO: Fix up HTML issues (requires jQuery, disabled for now)
             //fixhtml(element[0]);
 
             // Rebuild markdown
