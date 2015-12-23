@@ -1,59 +1,59 @@
 <!doctype html>
 <html ng-app="MyApp">
 <head>
-	<script src="bower_components/angular/angular.min.js"></script>
-	<script src="bower_components/rangy/rangy-core.js"></script>
-	<script src="markdown.js"></script>
-	<script src="wysimd.js"></script>
-	<script>
-		var MyApp = angular.module('MyApp', ['moof2k.wysimd']);
+    <script src="bower_components/angular/angular.min.js"></script>
+    <script src="bower_components/rangy/rangy-core.js"></script>
+    <script src="markdown.js"></script>
+    <script src="wysimd.js"></script>
+    <script>
+        var MyApp = angular.module('MyApp', ['moof2k.wysimd']);
 
-		MyApp.controller('MyController', function($scope) {
-			$scope.mycontrol = {};
-			$scope.editable = true;
-			$scope.mycontent = "# What you see is markdown\n\n**WYSIMD** is an Angular `directive` that renders a _contentEditable_-capable DIV backed by an ngModel storing Markdown.";
-		});
-	</script>
-	<style>
-	    wysimd {
-    	    font-family: Georgia, serif;
-    		font-size: 16px;
-	    }
-		wysimd:focus {
-		    outline: 0 none;
-		}
-	</style>
+        MyApp.controller('MyController', function($scope) {
+            $scope.mycontrol = {};
+            $scope.editable = true;
+            $scope.mycontent = "# What you see is markdown\n\n**WYSIMD** is an Angular `directive` that renders a _contentEditable_-capable DIV backed by an ngModel storing Markdown.";
+        });
+    </script>
+    <style>
+        wysimd {
+            font-family: Georgia, serif;
+            font-size: 16px;
+        }
+        wysimd:focus {
+            outline: 0 none;
+        }
+    </style>
 </head>
 <body ng-controller="MyController">
-	<table>
-	<tr>
-		<th>
-			<tt>textarea</tt>
-		</th>
-		<th>
-			<tt>wysimd</tt>
-		</th>
-	</tr>
-	<tr>
-		<td valign=top>
-			<textarea style="font-family: monospace;" cols=80 rows=20 ng-model="mycontent"></textarea>
-		</td>
-		<td valign=top>
-			<input type="checkbox" ng-model="editable">Editable</input>
-			<select ng-model="format" ng-init="format = 'p'" ng-change="mycontrol.format(format)">
-	            <option value="p">Paragraph</option>
-	            <option value="h1">Heading 1</option>
-	            <option value="h2">Heading 2</option>
-	            <option value="blockquote">Blockquote</option>
-	            <option value="pre">Codeblock</option>
+    <table>
+    <tr>
+        <th>
+            <tt>textarea</tt>
+        </th>
+        <th>
+            <tt>wysimd</tt>
+        </th>
+    </tr>
+    <tr>
+        <td valign=top>
+            <textarea style="font-family: monospace;" cols=80 rows=20 ng-model="mycontent"></textarea>
+        </td>
+        <td valign=top>
+            <input type="checkbox" ng-model="editable">Editable</input>
+            <select ng-model="format" ng-init="format = 'p'" ng-change="mycontrol.format(format)">
+                <option value="p">Paragraph</option>
+                <option value="h1">Heading 1</option>
+                <option value="h2">Heading 2</option>
+                <option value="blockquote">Blockquote</option>
+                <option value="pre">Codeblock</option>
             </select>
-			<button ng-click="mycontrol.bold()">B</button>
-			<button ng-click="mycontrol.italic()">I</button>
-			<button ng-click="mycontrol.unordered_list()">UL</button>
-			<button ng-click="mycontrol.ordered_list()">OL</button>
-     		<wysimd ng-model="mycontent" control="mycontrol" contentEditable="{{editable}}"></wysimd>
-     	</td>
-	</tr>
-	</table>
+            <button ng-click="mycontrol.bold()">B</button>
+            <button ng-click="mycontrol.italic()">I</button>
+            <button ng-click="mycontrol.unordered_list()">UL</button>
+            <button ng-click="mycontrol.ordered_list()">OL</button>
+            <wysimd ng-model="mycontent" control="mycontrol" contentEditable="{{editable}}"></wysimd>
+        </td>
+    </tr>
+    </table>
 </body>
 </html>
