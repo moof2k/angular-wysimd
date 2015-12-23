@@ -4,6 +4,8 @@
 [contentEditable](https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Content_Editable) backed by an
 ngModel storing [Markdown](https://daringfireball.net/projects/markdown/).
 
+Best demonstrated with a [live demo](http://moof2k.github.io/wysimd/).
+
 Some possible use cases for this code:
 
 * You want to display rendered Markdown in an Angular application
