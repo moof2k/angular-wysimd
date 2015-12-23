@@ -12,9 +12,11 @@ Some possible use cases for this code:
 
 ## Installation
 
-Download `wysimd.js` and `markdown.js` directly, or grab using bower:
+Quickly install w/ bower:
 
-    bower install https://github.com/moof2k/angular-wysimd
+    bower install angular-wysimd
+
+Otherwise download `wysimd.js`, `markdown.js`, angular > 1.2, rangy > 1.2.3.
 
 ## Example
 
