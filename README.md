@@ -18,11 +18,11 @@ Quickly install w/ bower:
 
     bower install angular-wysimd
 
-Otherwise download `wysimd.js`, `markdown.js`, angular > 1.2, rangy > 1.2.3.
+Otherwise download `wysimd.js`, `markdown.js`, angular > 1.2, rangy > 1.2.3 and include these scripts in your project.
 
-## Example
+## Configuration
 
-See [index.html](index.html) for a simple example.
+See [index.html](index.html) for a complete example.
 
 ## Some technical details
 
