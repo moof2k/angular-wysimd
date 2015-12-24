@@ -24,6 +24,16 @@
         wysimd:focus {
             outline: 0 none;
         }
+        blockquote {
+            border-left: 1px solid gray;
+            padding-left: 10px;
+            font-style: italic;
+        }
+        pre {
+            margin-left: 40px;
+            padding-left: 10px;
+            background-color: lightgrey;
+        }
     </style>
 </head>
 <body ng-controller="MyController">
@@ -47,9 +57,9 @@ ngModel storing [Markdown](https://daringfireball.net/projects/markdown/).
 
 ## Basic formatting
 
-Try emphasizing text in **bold** or _italics_ by surrounding text in \*\* or \_.
+Try emphasizing text in **bold** or _italics_ by surrounding text in \*\* or \_. Render text in a `monospace font` by surrounding it with \`.
 
-You can also insert [links](http://google.com) using \[name\]\(url\) syntax.
+Insert [links](http://google.com) using \[name\]\(url\).
 
 ## Lists
 
@@ -65,6 +75,21 @@ or
 1. List this
     1. and this
 
+## Blockquote Text
+
+Quote a block of text by indenting it with >
+
+> Quoth the Raven "Nevermore."
+
+## Preformatted Text
+
+Make a block of text preformatted by indenting it 4 spaces.
+
+    function foo() {
+        console.log('hello world');
+    }
+
+
 ## Tables
 
 | Header 1 | Header 2|
@@ -72,7 +97,7 @@ or
 | Cell A   | Cell B  |
 | Cell C   | Cell D  |
 
-            </textarea>
+</textarea>
         </td>
         <td valign=top>
             <input type="checkbox" ng-model="editable">Editable</input>
