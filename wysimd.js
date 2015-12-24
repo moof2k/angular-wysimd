@@ -134,7 +134,7 @@ directive('wysimd', function() {
             ngModel.$setViewValue(md);
 
         }
-    };
+    }
 
     var FILTER_NONE = 0x00;
     var FILTER_INLINE_FORMATTING = 0x01;
@@ -149,7 +149,7 @@ directive('wysimd', function() {
             child = child.nextSibling;
         }
         return md;
-    };
+    }
 
     // Returns markdown text representing the HTML starting at the given DOM node
     function dom2markdown(node, filter) {
@@ -281,7 +281,7 @@ directive('wysimd', function() {
                         md += iterateChildren(node, filter);
 
                         // If we're the last of the list, add additional newline
-                        if(node.parentNode.nodeName == "DIV" || node.parentNode.nodeName == "P") {
+                        if(node.parentNode.nodeName == "WYSIMD" || node.parentNode.nodeName == "DIV" || node.parentNode.nodeName == "P") {
                             md += "\n\n";
                         } else {
                             // Indent all contained text
@@ -334,7 +334,7 @@ directive('wysimd', function() {
         }
 
         return md;
-    };
+    }
 
     // Finds the block container parent of the given name, used by the keypress
     // handler to find containing LI's when the tab key is pressed.
@@ -348,7 +348,7 @@ directive('wysimd', function() {
                 return null;
             }
         }
-    };
+    }
 
     // Perform auto-completion / expansion tasks when a key is pressed within the HTML editor
     function html_keydown(event) {
@@ -493,5 +493,5 @@ directive('wysimd', function() {
 
             return true;
         }
-    };
+    }
 });
