@@ -11,7 +11,9 @@
         MyApp.controller('MyController', function($scope) {
             $scope.mycontrol = {};
             $scope.editable = true;
-            $scope.mycontent = "# What you see is markdown\n\n**WYSIMD** is an Angular `directive` that renders a _contentEditable_-capable DIV backed by an ngModel storing Markdown.";
+
+            // Seed initial content with initial value of textarea
+            $scope.mycontent = document.getElementById('mytextarea').value;
         });
     </script>
     <style>
@@ -36,7 +38,41 @@
     </tr>
     <tr>
         <td valign=top>
-            <textarea style="font-family: monospace;" cols=80 rows=20 ng-model="mycontent"></textarea>
+            <textarea id="mytextarea" style="font-family: monospace;" cols=80 rows=60 ng-model="mycontent">
+# What you see is markdown
+
+**WYSIMD** is an [Angular directive](https://docs.angularjs.org/guide/directive) that supplies a rich-text _WYSIWYG_
+[contentEditable](https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Content_Editable) backed by an
+ngModel storing [Markdown](https://daringfireball.net/projects/markdown/).
+
+## Basic formatting
+
+Try emphasizing text in **bold** or _italics_ by surrounding text in \*\* or \_.
+
+You can also insert [links](http://google.com) using \[name\]\(url\) syntax.
+
+## Lists
+
+Use \* and 1. to specify lists:
+
+* Bullet lists
+* Like this
+    * and this
+
+or
+
+1. Numbered lists
+1. List this
+    1. and this
+
+## Tables
+
+| Header 1 | Header 2|
+|----------|---------|
+| Cell A   | Cell B  |
+| Cell C   | Cell D  |
+
+            </textarea>
         </td>
         <td valign=top>
             <input type="checkbox" ng-model="editable">Editable</input>
