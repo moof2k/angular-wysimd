@@ -25,15 +25,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-var fixhtml = function(node) {
-
-    // Can't seem to efficiently detect the creation of span's.. so just always
-    // be looking for them and eliminating them. This is probably slow.
-    $(node).find('span').each(function(i) {
-        $(this).replaceWith(this.innerHTML);
-    });
-};
-
 angular.module('moof2k.wysimd', []).
 directive('wysimd', function() {
     return {
@@ -98,9 +89,6 @@ directive('wysimd', function() {
                 //scope.toolbarModel.bold = document.queryCommandState("bold");
                 //scope.toolbarModel.italic = document.queryCommandState("italic");
             }
-
-            // TODO: Fix up HTML issues (requires jQuery, disabled for now)
-            //fixhtml(element[0]);
 
             // Rebuild markdown
             scope.$evalAsync(html2markdown);
@@ -199,6 +187,10 @@ directive('wysimd', function() {
                     break;
                 case "IMG":
                     md += "![" + node.alt + "]" + "(" + node.src + ")";
+                    break;
+                case "SPAN":
+                    // Spans can appear when pasting rich text from the clipboard. Ignore them.
+                    md += iterateChildren(node, filter);
                     break;
                 case "B":
                 case "STRONG":
