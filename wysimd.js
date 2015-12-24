@@ -98,6 +98,40 @@ directive('wysimd', function() {
         element.on('keydown', function(event) {
             return html_keydown(event);
         });
+
+        // Special handler for pasting images
+        element.on('paste', function(event) {
+
+            var insertImage = function (evt) {
+                var result = evt.target.result;
+
+                // Determine where the selection cursor is
+                var sel = rangy.getSelection();
+                var range = sel.getRangeAt(0);
+                var container = range.commonAncestorContainer;
+
+                // Create an image element and insert it at the end of the current block
+                var img = document.createElement("img");
+                img.src = result;
+                container.parentNode.appendChild(img);
+            };
+
+            for(i = 0; i < event.clipboardData.items.length; i++)
+            {
+                var copiedData = event.clipboardData.items[i];
+
+                // If the clipboard data is just a single image, append it to the element
+                // TODO: parse text/html types to allow multiple images+text pastes
+                if(copiedData.type.indexOf("image") === 0) {
+                    var imageFile = copiedData.getAsFile();
+                    var reader = new FileReader();
+                    reader.onload = insertImage;
+
+                    // Read the image
+                    reader.readAsDataURL(imageFile);
+                }
+            }
+        });
     
         // Convert markdown to html
         function markdown2html() {
