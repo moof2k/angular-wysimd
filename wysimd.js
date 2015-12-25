@@ -189,6 +189,7 @@ directive('wysimd', function() {
                 md = md.replace(/\*/g, '\\*');
                 md = md.replace(/_/g, '\\_');
                 md = md.replace(/`/g, '\\`');
+                md = md.replace(/\[/g, '\\[');
             }
         } else {
             switch(node.nodeName) {
