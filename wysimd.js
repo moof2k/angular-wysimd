@@ -180,8 +180,9 @@ directive('wysimd', function() {
         if(node.nodeType == 3) {
             if(node.data == ' ') {
                 md += ' ';
-            }
-            else if(node.data.trim() !== '') {
+            } else if(node.data == '\n') {
+                md += '\n';
+            } else if(node.data.trim() !== '') {
                 md += node.data.replace(/\n/g, ' ');
 
                 // Escape inline formatting characters
